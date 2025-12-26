@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import storefrontImg from "./assets/storefront.jpg";
 
 /* =========================
    Store data
@@ -18,34 +19,8 @@ const GOOGLE_REVIEWS_URL =
 const LAST_UPDATED_LABEL = "December 2025";
 
 /* =========================
-   Specials (edit anytime)
+   Hours
 ========================= */
-const SPECIALS = {
-  heading: "Highlighted specials",
-  subheading: "Ongoing specials and popular picks — available while stocks last.",
-  note: "Specials may run for extended periods, but availability depends on stock.",
-  items: [
-    {
-      enabled: true,
-      badge: "Featured",
-      title: "Featured picks",
-      desc: "EDIT HERE: Put your best long-running specials here.",
-    },
-    {
-      enabled: true,
-      badge: "Ongoing",
-      title: "Ongoing specials",
-      desc: "EDIT HERE: Deals that stick around for weeks/months.",
-    },
-    {
-      enabled: true,
-      badge: "Popular",
-      title: "New / popular stock",
-      desc: "EDIT HERE: Imported snacks/drinks or what people ask for most.",
-    },
-  ],
-};
-
 const HOURS = [
   { day: "Monday", open: "06:30", close: "20:00" },
   { day: "Tuesday", open: "06:30", close: "20:00" },
@@ -319,9 +294,7 @@ function SectionHeader({ label, title, subtitle, right }) {
         {label ? <SectionLabel>{label}</SectionLabel> : null}
         <h3 className="mt-2 text-2xl font-bold tracking-tight">{title}</h3>
         {subtitle ? (
-          <p className="mt-2 text-sm text-stone-600 dark:text-stone-300 max-w-2xl">
-            {subtitle}
-          </p>
+          <p className="mt-2 text-sm text-stone-600 dark:text-stone-300 max-w-2xl">{subtitle}</p>
         ) : null}
       </div>
       {right ? <div>{right}</div> : null}
@@ -339,19 +312,7 @@ function StatusPill({ status }) {
       : "text-red-800 dark:text-red-200 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/25";
 
   const text = variant === "open" ? "OPEN" : variant === "soon" ? "CLOSING SOON" : "CLOSED";
-  return (
-    <span className={"text-[11px] font-semibold px-2.5 py-1 rounded-full border " + styles}>
-      {text}
-    </span>
-  );
-}
-
-function Pill({ children }) {
-  return (
-    <span className="text-[11px] font-semibold px-2 py-1 rounded-full border border-stone-200/80 dark:border-stone-800 bg-white/40 dark:bg-[#1a1916] text-stone-600 dark:text-stone-300">
-      {children}
-    </span>
-  );
+  return <span className={"text-[11px] font-semibold px-2.5 py-1 rounded-full border " + styles}>{text}</span>;
 }
 
 function HolidayTag({ children, tone = "amber" }) {
@@ -360,11 +321,7 @@ function HolidayTag({ children, tone = "amber" }) {
       ? "border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/25 text-red-800 dark:text-red-200"
       : "border-amber-200 dark:border-amber-900 bg-amber-50 dark:bg-amber-950/25 text-amber-900 dark:text-amber-200";
 
-  return (
-    <span className={"text-[11px] font-semibold px-2 py-1 rounded-full border " + cls}>
-      {children}
-    </span>
-  );
+  return <span className={"text-[11px] font-semibold px-2 py-1 rounded-full border " + cls}>{children}</span>;
 }
 
 /* =========================
@@ -476,7 +433,7 @@ export default function App() {
     cardNoPad:
       "rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#fbf6ee] dark:bg-[#1a1916] transition hover:-translate-y-0.5 hover:shadow-md",
     infoCard:
-      "rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#f7efe2] dark:bg-[#201e1b] p-6 transition hover:-translate-y-0.5 hover:shadow-md",
+      "rounded-2xl border border-stone-200/80 dark:border-stone-800 bg-[#f7efe2] dark:bg-[#201e1b] p-6",
 
     beigePrimary:
       "min-h-[44px] bg-[#d9c3a6] text-[#2a231b] hover:bg-[#cfb897] transition px-6 py-3 rounded-xl font-semibold shadow-sm border border-[#c9b79f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9b79f]/70",
@@ -492,9 +449,9 @@ export default function App() {
     revealVisible: "opacity-100 translate-y-0",
   };
 
+  // ✅ Specials removed from nav
   const navLinks = [
     ["#instore", "In store"],
-    ["#specials", "Specials"],
     ["#services", "Services"],
     ["#range", "More range"],
     ["#hours", "Hours"],
@@ -515,7 +472,6 @@ export default function App() {
 
   const rHero = useRevealOnScroll();
   const rInstore = useRevealOnScroll();
-  const rSpecials = useRevealOnScroll();
   const rServices = useRevealOnScroll();
   const rRange = useRevealOnScroll();
   const rHours = useRevealOnScroll();
@@ -525,22 +481,16 @@ export default function App() {
   const todayHoliday = isHoliday(now);
   const forcedToday = getForcedClosure(now);
 
-  const todaysHours = HOURS.find((h) => h.day === status.dayName);
+  const todaysHours = HOURS.find((h) => h.day === dayNameFromDate(now));
 
   return (
     <div className={ui.page}>
       {/* Header */}
       <header className={ui.header}>
         <div className={`${ui.container} py-4 flex items-center justify-between`}>
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="min-w-0">
-              <div className="text-base sm:text-lg font-bold tracking-tight truncate">
-                {STORE.name}
-              </div>
-              <div className="text-xs text-stone-500 dark:text-stone-400 truncate">
-                {STORE.suburb}
-              </div>
-            </div>
+          <div className="min-w-0">
+            <div className="text-base sm:text-lg font-bold tracking-tight truncate">{STORE.name}</div>
+            <div className="text-xs text-stone-500 dark:text-stone-400 truncate">{STORE.suburb}</div>
           </div>
 
           <div className="flex items-center gap-3">
@@ -616,13 +566,13 @@ export default function App() {
             <SectionLabel>HAWTHORNE • LOCAL CONVENIENCE</SectionLabel>
 
             <h1 className="mt-3 text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.05]">
-              Small store.
+              Local Convience Store.
               <span className="block">Reliable every day.</span>
             </h1>
 
             <p className="mt-4 text-lg text-stone-700 dark:text-stone-300 max-w-2xl leading-relaxed">
-              Snacks, cold drinks and essentials — including some American & Kiwi favourites.
-              Dry cleaning drop-off and collection available in store.
+              Snacks, cold drinks and everyday grocery essentials — including some American & Kiwi favourites.
+              Dry cleaning drop-off available in store.
             </p>
 
             <div className="mt-8 flex gap-3 flex-wrap">
@@ -642,13 +592,16 @@ export default function App() {
             </p>
           </div>
 
-          {/* Right: photo + overlay store info */}
+          {/* Right: photo + overlay info (ONLY status kept here) */}
           <div className="relative">
             <div className={ui.cardNoPad}>
               <div className="relative overflow-hidden rounded-2xl">
-                <div className="h-[340px] sm:h-[420px] bg-[#f2eadc] dark:bg-[#201e1b] grid place-items-center text-sm text-stone-500 dark:text-stone-400">
-                  Storefront photo placeholder
-                </div>
+                <img
+                  src={storefrontImg}
+                  alt="Hawthorne Corner Store storefront"
+                  className="h-[340px] sm:h-[420px] w-full object-cover"
+                  loading="eager"
+                />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/10 to-transparent dark:from-black/35" />
               </div>
             </div>
@@ -666,7 +619,7 @@ export default function App() {
                 <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
                   <div className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white/40 dark:bg-black/10 px-3 py-2">
                     <div className="text-xs text-stone-500 dark:text-stone-400">Today</div>
-                    <div className="font-semibold">{status.dayName}</div>
+                    <div className="font-semibold">{dayNameFromDate(now)}</div>
                   </div>
 
                   <div className="rounded-xl border border-stone-200/80 dark:border-stone-800 bg-white/40 dark:bg-black/10 px-3 py-2">
@@ -681,17 +634,21 @@ export default function App() {
                   </div>
                 </div>
 
-                {(todayHoliday.isHoliday || forcedToday.forcedClosed) && (
+                {(todayHoliday?.isHoliday || forcedToday.forcedClosed) && (
                   <div className="mt-3 text-xs text-stone-600 dark:text-stone-400">
                     {forcedToday.forcedClosed
                       ? "Closed today — Christmas Day."
                       : `Public holiday: ${todayHoliday.name}. Hours may differ.`}
                   </div>
                 )}
+
+                <div className="mt-3 text-xs text-stone-600 dark:text-stone-400">
+                  {status.label}
+                </div>
               </div>
             </div>
 
-            <div className="h-8" />
+            <div className="h-10" />
           </div>
         </div>
       </main>
@@ -710,10 +667,14 @@ export default function App() {
             {essentials.map((item) => (
               <div key={item.title} className={ui.card}>
                 <div className="flex items-start gap-4">
-                  <span className="text-2xl leading-none" aria-hidden="true">{item.emoji}</span>
+                  <span className="text-2xl leading-none" aria-hidden="true">
+                    {item.emoji}
+                  </span>
                   <div>
                     <h4 className="font-semibold mb-1">{item.title}</h4>
-                    <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">{item.desc}</p>
+                    <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                      {item.desc}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -726,34 +687,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* Specials */}
-      <section id="specials" className={ui.section}>
-        <div
-          ref={rSpecials.ref}
-          className={`max-w-7xl mx-auto ${ui.revealBase} ${
-            rSpecials.visible ? ui.revealVisible : ui.revealHidden
-          }`}
-        >
-          <SectionHeader label="SPECIALS" title={SPECIALS.heading} subtitle={SPECIALS.subheading} />
-
-          <div className="mt-7 grid gap-4 md:grid-cols-3">
-            {SPECIALS.items.filter((s) => s.enabled).map((item) => (
-              <div key={item.title} className={ui.card}>
-                <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <h4 className="font-semibold">{item.title}</h4>
-                  {item.badge ? <Pill>{item.badge}</Pill> : null}
-                </div>
-                <p className="mt-2 text-sm text-stone-600 dark:text-stone-400 leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-4 text-xs text-stone-500 dark:text-stone-500">{SPECIALS.note}</p>
-          <LastUpdated label={LAST_UPDATED_LABEL} />
-        </div>
-      </section>
-
-      {/* Services */}
+      {/* Services (simplified) */}
       <section id="services" className={ui.sectionAlt}>
         <div
           ref={rServices.ref}
@@ -763,24 +697,14 @@ export default function App() {
         >
           <SectionHeader label="SERVICES" title="Dry cleaning" subtitle="Drop-off and collection available in store." />
 
-          <div className="mt-7 grid gap-6 lg:grid-cols-2">
-            <div className={ui.infoCard}>
-              <p className="text-stone-700 dark:text-stone-300 leading-relaxed">
-                Convenient drop-off and collection in store. Cleaning is completed by an external professional provider.
-              </p>
-
-              <div className="mt-4 grid gap-2 text-sm text-stone-700 dark:text-stone-300">
-                <div className="flex items-start gap-3"><span aria-hidden>1️⃣</span><span>Drop off in store</span></div>
-                <div className="flex items-start gap-3"><span aria-hidden>2️⃣</span><span>Sent to our dry cleaning partner</span></div>
-                <div className="flex items-start gap-3"><span aria-hidden>3️⃣</span><span>Pick up when ready</span></div>
-              </div>
-
-              <p className="mt-4 text-xs text-stone-500 dark:text-stone-500">Turnaround times and pricing may vary.</p>
-            </div>
-
+          <div className="mt-7">
             <div className={ui.card}>
-              <h4 className="font-semibold mb-2">Dry cleaning details</h4>
-              <p className="text-sm text-stone-600 dark:text-stone-400">Details to be confirmed.</p>
+              <p className="text-stone-700 dark:text-stone-300 leading-relaxed">
+                Drop off your items in store and collect when ready. Cleaning is completed by an external professional provider.
+              </p>
+              <p className="mt-3 text-xs text-stone-500 dark:text-stone-500">
+                Turnaround times and pricing may vary.
+              </p>
             </div>
           </div>
         </div>
@@ -794,16 +718,24 @@ export default function App() {
             rRange.visible ? ui.revealVisible : ui.revealHidden
           }`}
         >
-          <SectionHeader label="MORE RANGE" title="Handy extras" subtitle="A small selection of tools and replacement wheels available." />
+          <SectionHeader
+            label="MORE RANGE"
+            title="Handy extras"
+            subtitle="A small selection of tools and replacement wheels available."
+          />
 
           <div className="mt-7 grid gap-4 md:grid-cols-3">
             {extraRange.map((item) => (
               <div key={item.title} className={ui.card}>
                 <div className="flex items-start gap-4">
-                  <span className="text-2xl leading-none" aria-hidden="true">{item.emoji}</span>
+                  <span className="text-2xl leading-none" aria-hidden="true">
+                    {item.emoji}
+                  </span>
                   <div>
                     <h4 className="font-semibold mb-1">{item.title}</h4>
-                    <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">{item.desc}</p>
+                    <p className="text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
+                      {item.desc}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -844,9 +776,9 @@ export default function App() {
                     key={row.iso}
                     className={[
                       "px-6 py-4",
-                      // FIX: don’t use a background fill for Today (it blended in).
-                      // Instead: subtle left border + dot so it always reads, but still “clean”.
-                      row.isToday ? "border-l-4 border-[#c9b79f] dark:border-[#c9b79f] bg-transparent" : "border-l-4 border-transparent",
+                      row.isToday
+                        ? "border-l-4 border-[#c9b79f] dark:border-[#c9b79f] bg-transparent"
+                        : "border-l-4 border-transparent",
                     ].join(" ")}
                   >
                     <div className="flex items-center justify-between gap-4 flex-wrap">
@@ -899,9 +831,7 @@ export default function App() {
         >
           <SectionHeader label="CONTACT" title="Find us" subtitle="Call, check reviews, or get directions." />
 
-          {/* FIX: items-start prevents left card stretching to match map height */}
           <div className="mt-7 grid gap-8 lg:grid-cols-2 items-start">
-            {/* FIX: h-fit ensures no extra whitespace */}
             <div className={`${ui.card} h-fit`}>
               <div className="space-y-2">
                 <p className="text-stone-700 dark:text-stone-300">
@@ -916,11 +846,6 @@ export default function App() {
                   >
                     {STORE.phoneDisplay}
                   </a>
-                </p>
-
-                <p className={`text-sm ${status.isOpen ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"}`}>
-                  {status.isOpen ? "● Open now" : "● Closed now"}{" "}
-                  <span className="text-stone-500 dark:text-stone-400">— {status.label}</span>
                 </p>
 
                 <div className="pt-4 flex gap-3 flex-wrap">
@@ -983,70 +908,51 @@ export default function App() {
       <div className="sm:hidden h-24" />
 
       {/* Footer */}
-      {/* Footer */}
-<footer className="px-6 py-10 border-t border-stone-200/80 dark:border-stone-800 bg-[#f2eadc] dark:bg-[#1d1b18]">
-  <div className="max-w-7xl mx-auto grid gap-6 sm:grid-cols-3 text-sm text-stone-600 dark:text-stone-400">
-    {/* Store */}
-    <div>
-      <div className="font-semibold text-stone-900 dark:text-stone-100">
-        {STORE.name}
-      </div>
-      <div>{STORE.suburb}</div>
-    </div>
+      <footer className="px-6 py-10 border-t border-stone-200/80 dark:border-stone-800 bg-[#f2eadc] dark:bg-[#1d1b18]">
+        <div className="max-w-7xl mx-auto grid gap-6 sm:grid-cols-3 text-sm text-stone-600 dark:text-stone-400">
+          <div>
+            <div className="font-semibold text-stone-900 dark:text-stone-100">{STORE.name}</div>
+            <div>{STORE.suburb}</div>
+          </div>
 
-    {/* Phone */}
-    <div>
-      <div className="font-semibold text-stone-900 dark:text-stone-100">
-        Phone
-      </div>
-      <div>{STORE.phoneDisplay}</div>
-    </div>
+          <div>
+            <div className="font-semibold text-stone-900 dark:text-stone-100">Phone</div>
+            <div>{STORE.phoneDisplay}</div>
+          </div>
 
-    {/* Status */}
-    <div>
-      <div className="font-semibold text-stone-900 dark:text-stone-100">
-        Status
-      </div>
-      <div
-        className={
-          status.isOpen
-            ? "text-green-700 dark:text-green-300"
-            : "text-red-700 dark:text-red-300"
-        }
-      >
-        {status.label}
-      </div>
-    </div>
-  </div>
+          <div>
+            <div className="font-semibold text-stone-900 dark:text-stone-100">Status</div>
+            <div className={status.isOpen ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"}>
+              {status.label}
+            </div>
+          </div>
+        </div>
 
-  {/* Copyright */}
-  <div className="max-w-7xl mx-auto text-xs text-stone-500 dark:text-stone-500 mt-6 text-center">
-    © {new Date().getFullYear()} {STORE.name}
-  </div>
+        <div className="max-w-7xl mx-auto text-xs text-stone-500 dark:text-stone-500 mt-6 text-center">
+          © {new Date().getFullYear()} {STORE.name}
+        </div>
 
-  {/* Credits */}
-  <div className="max-w-7xl mx-auto text-xs text-stone-500 dark:text-stone-500 mt-2 text-center">
-    Made by{" "}
-    <a
-      href="https://lostastr0.dev"
-      target="_blank"
-      rel="noreferrer"
-      className="font-semibold text-stone-700 dark:text-stone-300 underline decoration-stone-300 dark:decoration-stone-700 hover:decoration-stone-500"
-    >
-      lostastr0
-    </a>{" "}
-    • Hosted on{" "}
-    <a
-      href="https://vercel.com"
-      target="_blank"
-      rel="noreferrer"
-      className="underline decoration-stone-300 dark:decoration-stone-700 hover:decoration-stone-500"
-    >
-      Vercel
-    </a>
-  </div>
-</footer>
-
+        <div className="max-w-7xl mx-auto text-xs text-stone-500 dark:text-stone-500 mt-2 text-center">
+          Made by{" "}
+          <a
+            href="https://lostastr0.dev"
+            target="_blank"
+            rel="noreferrer"
+            className="font-semibold text-stone-700 dark:text-stone-300 underline decoration-stone-300 dark:decoration-stone-700 hover:decoration-stone-500"
+          >
+            lostastr0
+          </a>{" "}
+          • Hosted on{" "}
+          <a
+            href="https://vercel.com"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-stone-300 dark:decoration-stone-700 hover:decoration-stone-500"
+          >
+            Vercel
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }
